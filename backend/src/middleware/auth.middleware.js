@@ -6,35 +6,59 @@ import { env } from '../config/env.js';
 export const requireAdmin = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new AppError('AUTH_REQUIRED', 'Authentication required', 401);
+      throw new AppError(
+        'Authentication required',
+        401,
+        'AUTH_REQUIRED'
+      );
     }
 
     const token = authHeader.split(' ')[1];
-    
+
+    let decoded;
+
     try {
-      const decoded = jwt.verify(token, env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod');
-      
-      const admin = await prisma.admin.findUnique({
-        where: { id: decoded.adminId }
-      });
-
-      if (!admin) {
-        throw new AppError('AUTH_REQUIRED', 'Admin not found', 401);
-      }
-
-      if (!admin.active) {
-        throw new AppError('ADMIN_INACTIVE', 'Admin account is inactive', 403);
-      }
-
-      req.admin = admin;
-      next();
+      decoded = jwt.verify(token, env.JWT_SECRET);
     } catch (err) {
       if (err.name === 'TokenExpiredError') {
-        throw new AppError('TOKEN_EXPIRED', 'Token expired', 401);
+        throw new AppError(
+          'Token expired',
+          401,
+          'TOKEN_EXPIRED'
+        );
       }
-      throw new AppError('AUTH_REQUIRED', 'Invalid token', 401);
+
+      throw new AppError(
+        'Invalid token',
+        401,
+        'AUTH_REQUIRED'
+      );
     }
+
+    const admin = await prisma.admin.findUnique({
+      where: { id: decoded.adminId }
+    });
+
+    if (!admin) {
+      throw new AppError(
+        'Admin not found',
+        401,
+        'AUTH_REQUIRED'
+      );
+    }
+
+    if (!admin.active) {
+      throw new AppError(
+        'Admin account is inactive',
+        403,
+        'ADMIN_INACTIVE'
+      );
+    }
+
+    req.admin = admin;
+    next();
   } catch (error) {
     next(error);
   }

@@ -1,6 +1,13 @@
 import { Router } from 'express';
+
 import { env } from '../config/env.js';
 import prisma from '../config/db.js';
+
+import servicesRoutes from './services.routes.js';
+import appointmentsRoutes from './appointments.routes.js';
+import feedbackRoutes from './feedback.routes.js';
+import adminRoutes from './admin.routes.js';
+import businessRoutes from './business.routes.js';
 
 const router = Router();
 
@@ -13,8 +20,8 @@ router.get('/', (req, res) => {
 
 router.get('/health', async (req, res) => {
   try {
-    // Optional: simple query to test DB
     await prisma.$queryRaw`SELECT 1`;
+
     res.json({
       success: true,
       data: {
@@ -22,6 +29,8 @@ router.get('/health', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('❌ Health check database error:', error);
+
     res.status(503).json({
       success: false,
       error: {
@@ -32,14 +41,10 @@ router.get('/health', async (req, res) => {
   }
 });
 
-import servicesRoutes from './services.routes.js';
-import appointmentsRoutes from './appointments.routes.js';
-import feedbackRoutes from './feedback.routes.js';
-import adminRoutes from './admin.routes.js';
-
 router.use('/services', servicesRoutes);
 router.use('/appointments', appointmentsRoutes);
 router.use('/feedback', feedbackRoutes);
 router.use('/admin', adminRoutes);
+router.use('/business', businessRoutes);
 
 export default router;

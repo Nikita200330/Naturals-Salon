@@ -10,10 +10,18 @@ import {
 } from '../utils/salonTime.js';
 
 export const getAvailability = async (date, service) => {
-  const businessHours = {
-    open: '09:00',
-    close: '21:00'
-  };
+  const settings = await prisma.businessSettings.findFirst({
+  select: {
+    openingTime: true,
+    closingTime: true,
+    timezone: true
+  }
+});
+
+const businessHours = {
+  open: settings?.openingTime || '09:00',
+  close: settings?.closingTime || '21:00'
+};
 
   // If date is in the past, no availability
   if (isPastDate(date)) {

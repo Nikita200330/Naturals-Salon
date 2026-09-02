@@ -23,7 +23,7 @@ const errorHandler = (err, req, res, next) => {
   if (!(error instanceof AppError)) {
     if (error instanceof ZodError) {
       const fields = {};
-      error.errors.forEach(e => {
+      error.issues.forEach(e => {
         fields[e.path.join('.')] = e.message;
       });
       error = new AppError('Invalid request', 400, 'VALIDATION_ERROR', fields);

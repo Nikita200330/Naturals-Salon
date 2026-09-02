@@ -20,7 +20,7 @@ export const createAppointment = catchAsync(async (req, res) => {
     if (error instanceof ZodError) {
       // Map Zod errors to field object
       const fields = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path && err.path.length > 0) {
           fields[err.path[0]] = err.message;
         }

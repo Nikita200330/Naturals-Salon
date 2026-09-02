@@ -9,7 +9,7 @@ let server;
 const startServer = async () => {
   try {
     try {
-      // await prisma.$connect();
+      await prisma.$connect();
       console.log('✅ Database connected');
     } catch (dbError) {
       console.warn('⚠️ Could not connect to database, but starting server anyway for development testing.');
@@ -42,4 +42,3 @@ const gracefulShutdown = async () => {
 process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGUSR2', gracefulShutdown);
-setInterval(() => console.log("keep alive"), 10000);

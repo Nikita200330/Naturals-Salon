@@ -31,7 +31,7 @@ export const loginAdmin = async (email, password) => {
 
   const token = jwt.sign(
     { adminId: admin.id, role: admin.role },
-    env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod',
+    env.JWT_SECRET,
     { expiresIn: '8h' }
   );
 
