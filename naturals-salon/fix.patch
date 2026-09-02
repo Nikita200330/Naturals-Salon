@@ -1,0 +1,7 @@
+--- src/index.css
++++ src/index.css
+@@ -4,2 +4,4 @@
+ 
++@layer base {
++  :root {
+     --bg-primary: #0f051a; /* brand-950 */

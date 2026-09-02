@@ -1,0 +1,4 @@
+◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+✅ Database connected
+✅ Server running in development mode on port 5005
+SHUTTING DOWN

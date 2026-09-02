@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id              String         @id @default(cuid())
+  slug            String         @unique
+  name            String
+  category        String
+  description     String?
+  price           Decimal?       @db.Decimal(10, 2)
+  durationMinutes Int?
+  active          Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  appointments    Appointment[]
+  feedbacks       Feedback[]
+  galleryImages   GalleryImage[]
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELLED
+  COMPLETED
+  RESCHEDULE_REQUESTED
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+  customerName  String
+  mobile        String
+  serviceId     String
+  preferredDate DateTime          @db.Date
+  preferredTime String
+  message       String?
+  status        AppointmentStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  service       Service           @relation(fields: [serviceId], references: [id])
+  statusHistory AppointmentStatusHistory[]
+}
+
+enum FeedbackStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Feedback {
+  id        String         @id @default(cuid())
+  name      String
+  rating    Int
+  feedback  String
+  serviceId String?
+  status    FeedbackStatus @default(PENDING)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  service   Service?       @relation(fields: [serviceId], references: [id])
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  alt       String?
+  category  String
+  serviceId String?
+  featured  Boolean  @default(false)
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  service   Service? @relation(fields: [serviceId], references: [id])
+}
+
+model BusinessSettings {
+  id                String   @id @default(cuid())
+  name              String
+  phone             String?
+  whatsapp          String?
+  addressLine1      String?
+  addressLine2      String?
+  city              String?
+  state             String?
+  postalCode        String?
+  country           String?
+  mapsUrl           String?
+  timezone          String   @default("Asia/Kolkata")
+  googleRating      Float?
+  googleReviewCount Int?
+  websiteUrl        String?
+  openingTime       String?
+  closingTime       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum AdminRole {
+  ADMIN
+}
+
+model Admin {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(ADMIN)
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  statusHistory AppointmentStatusHistory[]
+}
+
+model AppointmentStatusHistory {
+  id               String            @id @default(cuid())
+  appointmentId    String
+  fromStatus       AppointmentStatus
+  toStatus         AppointmentStatus
+  changedByAdminId String?
+  note             String?
+  createdAt        DateTime          @default(now())
+
+  appointment      Appointment       @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  changedByAdmin   Admin?            @relation(fields: [changedByAdminId], references: [id], onDelete: SetNull)
+}
